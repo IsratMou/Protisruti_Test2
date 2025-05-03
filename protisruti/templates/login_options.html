@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Protisruti - Login Options{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Choose Login Type</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">User Login</h5>
+                                <p class="card-text">If you need support and counseling</p>
+                                <a href="{% url 'login' %}?user_type=user" class="btn btn-primary">Login as User</a>
+                                <div class="mt-3">
+                                    <small>Don't have an account? <a href="{% url 'register_user' %}">Register</a></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Counselor Login</h5>
+                                <p class="card-text">If you are a verified counselor</p>
+                                <a href="{% url 'login' %}?user_type=counselor" class="btn btn-secondary">Login as Counselor</a>
+                                <div class="mt-3">
+                                    <small>Want to join as counselor? <a href="{% url 'register_counselor' %}">Apply</a></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

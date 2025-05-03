@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Protisruti - Home{% endblock %}
+
+{% block content %}
+<div class="row align-items-center">
+    <div class="col-lg-6">
+        <h1 class="display-4">Welcome to Protisruti</h1>
+        <p class="lead">A safe platform connecting victims with counselors for support and guidance.</p>
+        
+        <div class="mt-4">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'login_options' %}" class="btn btn-primary me-2">Get Started</a>
+                <a href="{% url 'register_user' %}" class="btn btn-outline-secondary">Register for Help</a>
+            {% else %}
+                {% if user.user_type == 'user' %}
+                    <a href="{% url 'user_dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                {% elif user.user_type == 'counselor' %}
+                    <a href="{% url 'counselor_dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <img src="/static/images/hero-image.jpg" alt="Support and Counseling" class="img-fluid rounded shadow">
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-4">How Protisruti Works</h2>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h3 class="h5 card-title">Register</h3>
+                <p class="card-text">Create an account and provide some basic information about yourself.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h3 class="h5 card-title">Get Matched</h3>
+                <p class="card-text">We'll connect you with a verified counselor who specializes in your needs.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h3 class="h5 card-title">Receive Support</h3>
+                <p class="card-text">Communicate with your counselor in a secure and private environment.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
