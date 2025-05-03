@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from time import timezone
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -7,15 +8,20 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.db import transaction
 
-from .models import User, UserProfile, CounselorProfile
+from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile
+
 from .forms import (
-    CustomAuthenticationForm, 
+    CounselingSessionForm,
+    CounselorAvailabilityForm,
+    CounselorVerificationForm,
+    CustomAuthenticationForm,
+    UserCounselorAssignmentForm, 
     UserRegistrationForm, 
     UserProfileForm, 
     CounselorRegistrationForm, 
     CounselorProfileForm
 )
-from .decorators import user_required, counselor_required
+from .decorators import admin_required, user_required, counselor_required
 
 
 def home(request):
