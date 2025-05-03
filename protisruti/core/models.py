@@ -110,3 +110,91 @@ class CounselorProfile(models.Model):
     
     def __str__(self):
         return f"Counselor: {self.full_name}"
+    
+    
+
+# Add these models to core/models.py
+
+class CounselorAvailability(models.Model):
+    """
+    Model to track counselor availability for sessions
+    """
+    DAY_CHOICES = (
+        ('monday', 'Monday'),
+        ('tuesday', 'Tuesday'),
+        ('wednesday', 'Wednesday'),
+        ('thursday', 'Thursday'),
+        ('friday', 'Friday'),
+        ('saturday', 'Saturday'),
+        ('sunday', 'Sunday'),
+    )
+    
+    counselor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='availabilities')
+    day = models.CharField(max_length=10, choices=DAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_available = models.BooleanField(default=True)
+    
+    class Meta:
+        unique_together = ('counselor', 'day', 'start_time', 'end_time')
+        verbose_name_plural = 'Counselor Availabilities'
+    
+    def __str__(self):
+        return f"{self.counselor.counselor_profile.full_name} - {self.get_day_display()} ({self.start_time} - {self.end_time})"
+
+
+class CounselorAssignment(models.Model):
+    """
+    Model to track assignment of users to counselors
+    """
+    STATUS_CHOICES = (
+        ('active', 'Active'),
+        ('paused', 'Paused'),
+        ('completed', 'Completed'),
+        ('terminated', 'Terminated'),
+    )
+    
+    counselor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='assigned_users')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_counselors')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+    last_session = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        unique_together = ('counselor', 'user', 'status')
+    
+    def __str__(self):
+        return f"{self.user.user_profile.full_name} assigned to {self.counselor.counselor_profile.full_name}"
+    
+    def is_active(self):
+        return self.status == 'active'
+
+
+class CounselingSession(models.Model):
+    """
+    Model to track scheduled and completed counseling sessions
+    """
+    STATUS_CHOICES = (
+        ('scheduled', 'Scheduled'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('missed', 'Missed'),
+    )
+    
+    assignment = models.ForeignKey(CounselorAssignment, on_delete=models.CASCADE, related_name='sessions')
+    scheduled_time = models.DateTimeField()
+    duration_minutes = models.PositiveIntegerField(default=60)
+    status = models.CharField(max_length=11, choices=STATUS_CHOICES, default='scheduled')
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Session: {self.assignment.user.user_profile.full_name} with {self.assignment.counselor.counselor_profile.full_name} on {self.scheduled_time}"
+    
+    def is_upcoming(self):
+        return self.status == 'scheduled' and self.scheduled_time > timezone.now()
+    
+    

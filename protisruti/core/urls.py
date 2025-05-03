@@ -10,4 +10,16 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/user/', views.user_dashboard, name='user_dashboard'),
     path('dashboard/counselor/', views.counselor_dashboard, name='counselor_dashboard'),
+    
+    path('counselor/availability/', views.manage_availability, name='manage_availability'),
+    path('counselor/availability/delete/<int:availability_id>/', views.delete_availability, name='delete_availability'),
+    path('counselor/assignments/', views.view_assignments, name='view_assignments'),
+    path('counselor/assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
+    path('counselor/schedule-session/<int:assignment_id>/', views.schedule_session, name='schedule_session'),
+    path('counselor/session/update-status/<int:session_id>/', views.update_session_status, name='update_session_status'),
+    
+    # Admin URLs for counselor verification and assignment
+    path('admin/verify-counselors/', views.verify_counselors, name='verify_counselors'),
+    path('admin/verify-counselor/<int:counselor_id>/', views.counselor_verification_detail, name='counselor_verification_detail'),
+    path('admin/assign-counselor/', views.assign_counselor, name='assign_counselor'),
 ]
