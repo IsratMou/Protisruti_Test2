@@ -74,6 +74,18 @@
                     <p class="text-muted">Your counselor assignments will appear here</p>
                     <a href="#" class="btn btn-primary">Request Counselor</a>
                 </div>
+                
+                <h3>Your Assignments</h3>
+                <ul>
+                    {% for assignment in user_profile.user.assignments.all %}
+                    <li>
+                        Assigned Counselor: {{ assignment.counselor.full_name }}<br>
+                        Assigned At: {{ assignment.assigned_at }}
+                    </li>
+                    {% empty %}
+                    <li>No assignments found.</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

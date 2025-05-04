@@ -364,6 +364,25 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Counselor Assignments -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Your Assigned Victims</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for assignment in counselor_profile.user.counselor_profile.assignments.all %}
+                        <li>
+                            Assigned Victim: {{ assignment.victim.email }}<br>
+                            Assigned At: {{ assignment.assigned_at }}
+                        </li>
+                        {% empty %}
+                        <li>No assignments found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         {% endif %}
     </div>
 </div>

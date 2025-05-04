@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.db import models
+from django.contrib import admin
 
 
 class CustomUserManager(BaseUserManager):
@@ -198,3 +200,22 @@ class CounselingSession(models.Model):
         return self.status == 'scheduled' and self.scheduled_time > timezone.now()
     
     
+    
+
+
+class VictimCounselorAssignment(models.Model):
+    victim = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments')
+    counselor = models.ForeignKey(CounselorProfile, on_delete=models.CASCADE, related_name='assignments')
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.victim} assigned to {self.counselor}"
+    
+    
+
+
+@admin.register(VictimCounselorAssignment)
+class VictimCounselorAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('victim', 'counselor', 'assigned_at')
+    search_fields = ('victim__email', 'counselor__user__email')
+    list_filter = ('assigned_at',)

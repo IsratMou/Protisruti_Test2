@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, authenticate, logout
@@ -496,3 +497,17 @@ def assign_counselor(request):
         'active_assignments': active_assignments
     }
     return render(request, 'assign_counselor.html', context)
+
+
+@login_required
+def victim_assignments(request):
+    # Fetch assignments for the logged-in victim
+    assignments = request.user.assignments.all()
+    return render(request, 'victim_assignments.html', {'assignments': assignments})
+
+
+@login_required
+def counselor_assignments(request):
+    # Fetch assignments for the logged-in counselor
+    assignments = request.user.counselor_profile.assignments.all()
+    return render(request, 'counselor_assignments.html', {'assignments': assignments})

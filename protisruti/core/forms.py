@@ -2,7 +2,7 @@ from time import timezone
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.validators import RegexValidator
-from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile
+from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile, VictimCounselorAssignment
 
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -343,3 +343,11 @@ class UserCounselorAssignmentForm(forms.ModelForm):
         # Add Bootstrap classes
         self.fields['counselor'].widget.attrs.update({'class': 'form-control'})
         self.fields['user'].widget.attrs.update({'class': 'form-control'})
+        
+        
+
+
+class VictimCounselorAssignmentForm(forms.ModelForm):
+    class Meta:
+        model = VictimCounselorAssignment
+        fields = ['victim', 'counselor']
