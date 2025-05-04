@@ -2,7 +2,7 @@ from time import timezone
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.validators import RegexValidator
-from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile, VictimCounselorAssignment
+from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile, VictimCounselorAssignment, Message
 
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -17,7 +17,7 @@ class CustomAuthenticationForm(AuthenticationForm):
         'class': 'form-control',
         'placeholder': 'Password',
     }))
-    
+
     class Meta:
         model = User
         fields = ['email', 'password']
@@ -40,18 +40,19 @@ class UserRegistrationForm(UserCreationForm):
         'placeholder': 'Confirm Password',
     }))
     phone_number = forms.CharField(
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")],
+        validators=[RegexValidator(
+            r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")],
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Phone Number',
         }),
         required=False
     )
-    
+
     class Meta:
         model = User
         fields = ['email', 'password1', 'password2', 'phone_number']
-    
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.user_type = 'user'
@@ -86,7 +87,7 @@ class UserProfileForm(forms.ModelForm):
         'class': 'form-control',
         'placeholder': 'Emergency Contact Number',
     }), required=False)
-    
+
     class Meta:
         model = UserProfile
         fields = ['full_name', 'gender', 'age', 'address', 'emergency_contact']
@@ -109,18 +110,19 @@ class CounselorRegistrationForm(UserCreationForm):
         'placeholder': 'Confirm Password',
     }))
     phone_number = forms.CharField(
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")],
+        validators=[RegexValidator(
+            r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")],
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Phone Number',
         }),
         required=False
     )
-    
+
     class Meta:
         model = User
         fields = ['email', 'password1', 'password2', 'phone_number']
-    
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.user_type = 'counselor'
@@ -157,12 +159,13 @@ class CounselorProfileForm(forms.ModelForm):
     verification_document = forms.FileField(widget=forms.FileInput(attrs={
         'class': 'form-control',
     }), required=False)
-    
+
     class Meta:
         model = CounselorProfile
-        fields = ['full_name', 'specialization', 'qualification', 'experience_years', 'bio', 'verification_document']
-        
-        
+        fields = ['full_name', 'specialization', 'qualification',
+                  'experience_years', 'bio', 'verification_document']
+
+
 # Add these forms to core/forms.py
 
 class CounselorVerificationForm(forms.ModelForm):
@@ -173,7 +176,7 @@ class CounselorVerificationForm(forms.ModelForm):
         ('verified', 'Verify'),
         ('rejected', 'Reject'),
     )
-    
+
     verification_status = forms.ChoiceField(
         choices=VERIFICATION_CHOICES,
         widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
@@ -186,7 +189,7 @@ class CounselorVerificationForm(forms.ModelForm):
         }),
         required=False
     )
-    
+
     class Meta:
         model = CounselorProfile
         fields = ['verification_status', 'verification_notes']
@@ -217,19 +220,20 @@ class CounselorAvailabilityForm(forms.ModelForm):
         initial=True,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
-    
+
     class Meta:
         model = CounselorAvailability
         fields = ['day', 'start_time', 'end_time', 'is_available']
-    
+
     def clean(self):
         cleaned_data = super().clean()
         start_time = cleaned_data.get('start_time')
         end_time = cleaned_data.get('end_time')
-        
+
         if start_time and end_time and start_time >= end_time:
-            raise forms.ValidationError("End time must be later than start time")
-        
+            raise forms.ValidationError(
+                "End time must be later than start time")
+
         return cleaned_data
 
 
@@ -244,7 +248,8 @@ class CounselingSessionForm(forms.ModelForm):
         })
     )
     duration_minutes = forms.ChoiceField(
-        choices=[(30, '30 minutes'), (45, '45 minutes'), (60, '1 hour'), (90, '1.5 hours'), (120, '2 hours')],
+        choices=[(30, '30 minutes'), (45, '45 minutes'),
+                 (60, '1 hour'), (90, '1.5 hours'), (120, '2 hours')],
         initial=60,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -256,29 +261,29 @@ class CounselingSessionForm(forms.ModelForm):
         }),
         required=False
     )
-    
+
     class Meta:
         model = CounselingSession
         fields = ['scheduled_time', 'duration_minutes', 'notes']
-    
+
     def __init__(self, *args, **kwargs):
         self.counselor = kwargs.pop('counselor', None)
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
+
     def clean_scheduled_time(self):
         scheduled_time = self.cleaned_data.get('scheduled_time')
-        
+
         # Check if the scheduled time is in the future
         if scheduled_time and scheduled_time <= timezone.now():
             raise forms.ValidationError("Scheduled time must be in the future")
-            
+
         # If counselor is provided, check availability
         if self.counselor and scheduled_time:
             # Get day of week as lowercase string
             day_of_week = scheduled_time.strftime('%A').lower()
             time_of_day = scheduled_time.time()
-            
+
             # Check if counselor is available at this time
             availability_exists = CounselorAvailability.objects.filter(
                 counselor=self.counselor,
@@ -287,25 +292,29 @@ class CounselingSessionForm(forms.ModelForm):
                 end_time__gte=time_of_day,
                 is_available=True
             ).exists()
-            
+
             if not availability_exists:
-                raise forms.ValidationError("The counselor is not available at this time")
-            
+                raise forms.ValidationError(
+                    "The counselor is not available at this time")
+
             # Check if counselor already has a session at this time
             duration = self.cleaned_data.get('duration_minutes', 60)
-            session_end_time = scheduled_time + timezone.timedelta(minutes=int(duration))
-            
-            counselor_assignments = CounselorAssignment.objects.filter(counselor=self.counselor, status='active')
+            session_end_time = scheduled_time + \
+                timezone.timedelta(minutes=int(duration))
+
+            counselor_assignments = CounselorAssignment.objects.filter(
+                counselor=self.counselor, status='active')
             conflicting_sessions = CounselingSession.objects.filter(
                 assignment__in=counselor_assignments,
                 status='scheduled',
                 scheduled_time__lt=session_end_time,
                 scheduled_time__gte=scheduled_time
             )
-            
+
             if conflicting_sessions.exists():
-                raise forms.ValidationError("The counselor already has a session scheduled at this time")
-        
+                raise forms.ValidationError(
+                    "The counselor already has a session scheduled at this time")
+
         return scheduled_time
 
 
@@ -325,11 +334,11 @@ class UserCounselorAssignmentForm(forms.ModelForm):
         }),
         required=False
     )
-    
+
     class Meta:
         model = CounselorAssignment
         fields = ['counselor', 'user', 'status', 'notes']
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Only show verified counselors in the dropdown
@@ -339,15 +348,22 @@ class UserCounselorAssignmentForm(forms.ModelForm):
         )
         # Only show regular users in the dropdown
         self.fields['user'].queryset = User.objects.filter(user_type='user')
-        
+
         # Add Bootstrap classes
         self.fields['counselor'].widget.attrs.update({'class': 'form-control'})
         self.fields['user'].widget.attrs.update({'class': 'form-control'})
-        
-        
 
 
 class VictimCounselorAssignmentForm(forms.ModelForm):
     class Meta:
         model = VictimCounselorAssignment
         fields = ['victim', 'counselor']
+
+
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Type your message here...', 'rows': 3}),
+        }

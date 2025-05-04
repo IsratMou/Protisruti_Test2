@@ -37,4 +37,6 @@ urlpatterns = [
          name='victim_assignments'),
     path('counselor/assignments/', views.counselor_assignments,
          name='counselor_assignments'),
+    path('chat/<int:assignment_id>/', views.chat_view, name='chat_view'),
+    path('chat/<str:receiver_email>/', views.chat_view, name='chat'),
 ]

@@ -1,3 +1,7 @@
+from django.shortcuts import get_object_or_404
+from .forms import MessageForm
+from .models import Message, VictimCounselorAssignment
+from django.shortcuts import render, get_object_or_404, redirect
 from django.shortcuts import render
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, render, redirect
@@ -8,8 +12,9 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.db import transaction
+from django.db import models
 
-from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile
+from .models import CounselingSession, CounselorAssignment, CounselorAvailability, User, UserProfile, CounselorProfile, Message, VictimCounselorAssignment
 
 from .forms import (
     CounselingSessionForm,
@@ -20,7 +25,8 @@ from .forms import (
     UserRegistrationForm,
     UserProfileForm,
     CounselorRegistrationForm,
-    CounselorProfileForm
+    CounselorProfileForm,
+    MessageForm
 )
 from .decorators import admin_required, user_required, counselor_required
 
@@ -511,3 +517,21 @@ def counselor_assignments(request):
     # Fetch assignments for the logged-in counselor
     assignments = request.user.counselor_profile.assignments.all()
     return render(request, 'counselor_assignments.html', {'assignments': assignments})
+
+
+@login_required
+def chat_view(request, receiver_email):
+    receiver = get_object_or_404(User, email=receiver_email)
+    messages = Message.objects.filter(
+        (models.Q(sender=request.user) & models.Q(receiver=receiver)) |
+        (models.Q(sender=receiver) & models.Q(receiver=request.user))
+    ).order_by('timestamp')
+
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            Message.objects.create(sender=request.user,
+                                   receiver=receiver, content=content)
+            return redirect('chat', receiver_email=receiver.email)
+
+    return render(request, 'chat.html', {'receiver': receiver, 'messages': messages})
