@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Counselors{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Pending Counselor Verifications</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Specialization</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for counselor in pending_counselors %}
+            <tr>
+                <td>{{ counselor.full_name }}</td>
+                <td>{{ counselor.user.email }}</td>
+                <td>{{ counselor.get_specialization_display }}</td>
+                <td>
+                    <a href="{% url 'counselor_verification_detail' counselor.user.id %}" class="btn btn-primary btn-sm">Review</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Verified Counselors</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Specialization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for counselor in verified_counselors %}
+            <tr>
+                <td>{{ counselor.full_name }}</td>
+                <td>{{ counselor.user.email }}</td>
+                <td>{{ counselor.get_specialization_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Rejected Counselors</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Specialization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for counselor in rejected_counselors %}
+            <tr>
+                <td>{{ counselor.full_name }}</td>
+                <td>{{ counselor.user.email }}</td>
+                <td>{{ counselor.get_specialization_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
